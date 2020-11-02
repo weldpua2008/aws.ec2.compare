@@ -60,7 +60,8 @@ jobs:
     strategy:
       max-parallel: 1
       matrix:
-        python-version: [3.6, 3.7, 3.8]
+        # python-version: [3.6, 3.7, 3.8]
+        python-version: [3.7, 3.8]
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
@@ -76,6 +77,8 @@ jobs:
             ${{ matrix.python-version }}-package-
       - name: Install dependencies & package
         run: |
+          python -m pip install --upgrade pip
+          pip install flake8 pytest
           pip  install -e ./[devel]
       - name: Test with pytest
         run: |

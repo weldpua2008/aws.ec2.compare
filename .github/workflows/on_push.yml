@@ -1,15 +1,19 @@
 name: Code style and test
 on:
   push:
+    branches: [ main ]
     paths-ignore:
       - ec2_compare/version.py
       - ec2_compare/version.txt
       - CHANGELOG.md
       - README.md
       - CONTRIBUTING.md
+
+  pull_request:
+    branches: [ main ]
 jobs:
   unit-tests:
-    name: Code style & unit tests
+    name: "Code style and unit tests"
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 4
@@ -36,19 +40,19 @@ jobs:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         run: |
           scripts/tests.sh
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        file: tests/coverage.xml
-        files: tests/coverage1.xml,tests/coverage2.xml
-        directory: tests/coverage/reports/
-        flags: unittests
-        env_vars: OS,PYTHON
-        name: codecov-umbrella
-        fail_ci_if_error: true
-        path_to_write_report: tests/coverage/codecov_report.gz
-        verbose: true
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: tests/coverage.xml
+          files: tests/coverage1.xml,tests/coverage2.xml
+          directory: tests/coverage/reports/
+          flags: unittests
+          env_vars: OS,PYTHON
+          name: codecov-umbrella
+          fail_ci_if_error: true
+          path_to_write_report: tests/coverage/codecov_report.gz
+          verbose: true
 
 
   integration-tests:
@@ -77,16 +81,16 @@ jobs:
       - name: Test with pytest
         run: |
           scripts/tests.sh
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
-      with:
-        # token: ${{ secrets.CODECOV_TOKEN }}
-        file: tests/coverage.xml
-        files: tests/coverage1.xml,tests/coverage2.xml
-        directory: tests/coverage/reports/
-        flags: unittests
-        env_vars: OS,PYTHON
-        name: codecov-umbrella
-        fail_ci_if_error: true
-        path_to_write_report: tests/coverage/codecov_report.gz
-        verbose: true
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          # token: ${{ secrets.CODECOV_TOKEN }}
+          file: tests/coverage.xml
+          files: tests/coverage1.xml,tests/coverage2.xml
+          directory: tests/coverage/reports/
+          flags: unittests
+          env_vars: OS,PYTHON
+          name: codecov-umbrella
+          fail_ci_if_error: true
+          path_to_write_report: tests/coverage/codecov_report.gz
+          verbose: true

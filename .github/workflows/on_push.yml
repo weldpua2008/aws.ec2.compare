@@ -54,7 +54,6 @@ jobs:
           path_to_write_report: tests/coverage/codecov_report.gz
           verbose: true
 
-
   integration-tests:
     name: Integration tests
     runs-on: ubuntu-latest

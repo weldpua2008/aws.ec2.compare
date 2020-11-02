@@ -1,0 +1,92 @@
+name: Code style and test
+on:
+  push:
+    paths-ignore:
+      - ec2_compare/version.py
+      - ec2_compare/version.txt
+      - CHANGELOG.md
+      - README.md
+      - CONTRIBUTING.md
+jobs:
+  unit-tests:
+    name: Code style & unit tests
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [3.8]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Cache packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ matrix.python-version }}-package-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ matrix.python-version }}-package-
+      - name: Install dependencies
+        run: |
+          pip3.6  install -e ./data/[devel]
+      - name: Test
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        run: |
+          scripts/tests.sh
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: tests/coverage.xml
+        files: tests/coverage1.xml,tests/coverage2.xml
+        directory: tests/coverage/reports/
+        flags: unittests
+        env_vars: OS,PYTHON
+        name: codecov-umbrella
+        fail_ci_if_error: true
+        path_to_write_report: tests/coverage/codecov_report.gz
+        verbose: true
+
+
+  integration-tests:
+    name: Integration tests
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [3.6, 3.7, 3.8]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Cache packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ matrix.python-version }}-package-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ matrix.python-version }}-package-
+      - name: Install dependencies & package
+        run: |
+          pip3.6  install -e ./data/[devel]
+      - name: Test with pytest
+        run: |
+          scripts/tests.sh
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        # token: ${{ secrets.CODECOV_TOKEN }}
+        file: tests/coverage.xml
+        files: tests/coverage1.xml,tests/coverage2.xml
+        directory: tests/coverage/reports/
+        flags: unittests
+        env_vars: OS,PYTHON
+        name: codecov-umbrella
+        fail_ci_if_error: true
+        path_to_write_report: tests/coverage/codecov_report.gz
+        verbose: true

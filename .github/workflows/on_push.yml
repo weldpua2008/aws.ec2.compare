@@ -34,7 +34,7 @@ jobs:
             ${{ matrix.python-version }}-package-
       - name: Install dependencies
         run: |
-          pip  install -e ./data/[devel]
+          pip3 install -e ./data/[devel]
       - name: Test
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
@@ -76,7 +76,7 @@ jobs:
             ${{ matrix.python-version }}-package-
       - name: Install dependencies & package
         run: |
-          pip  install -e ./data/[devel]
+          pip3  install -e ./data/[devel]
       - name: Test with pytest
         run: |
           scripts/tests.sh

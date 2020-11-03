@@ -30,7 +30,7 @@ jobs:
           draft: false
           prerelease: true
           body_path: CHANGELOG.md
-  Publish-to-PyPi:
+  Publish-PyPi:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}

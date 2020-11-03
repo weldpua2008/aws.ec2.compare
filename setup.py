@@ -116,10 +116,10 @@ def do_setup():
             'setuptools',
             'wheel',
         ],
-        include_package_data=True,
-        data_files = [
-            (PACKAGE_NAME, ['./version.txt']),
-         ],
+        # include_package_data=True,
+        # data_files = [
+        #     (PACKAGE_NAME, ['version.txt']),
+        #  ],
 
         packages=find_packages(),
         install_requires=INSTALL_REQUIREMENTS,

@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
-echo "##########################################"
-echo "###############  BUILD  ##################"
-echo "##########################################"
+export PYTHON_VERSION=${PYTHON_VERSION:-}
+export VERSION=${VERSION:-}
+
+echo "#########################################################################"
+echo "###############  BUILD with Python ${PYTHON_VERSION:-} ##################"
+echo "#########################################################################"
 export LC_ALL="en_US.UTF-8" 2> /dev/null
 
 export OUTPUT_PATH="./release_folder"
@@ -36,13 +39,21 @@ trap 'on_exit $?' EXIT HUP TERM INT
 set -e
 
 ###### Main
-
 cd $(dirname "$0")/.. \
     && pwd \
     && _pre \
-    && python setup.py build sdist bdist_wheel \
-    && twine upload --repository-url http://localhost:8080/ --username user --password pass --non-interactive dist/*\
+    && python${PYTHON_VERSION} setup.py build sdist bdist_wheel \
+    && export _VERSION=$(cat version.txt || echo $VERSION) \
+    && export VERSION=${__VERSION:-$VERSION} \
+    && export PACKAGE_VERSION=${VERSION} \
+    && twine upload --disable-progress-bar --non-interactive --skip-existing  dist/*\
     && cd -
 
     exit_code=$?
+
+# for py in "2.7" "3.6" "3.7" "3.8" "3.9";do
+#  docker run -ti --rm python:${py} bash -c "
+#  pip install ec2-compare && python -c 'import sys;from ec2_compare import ec2data; sys.exit(127) if not ec2data.get_instances_dict() else print(\"${py} is OK\")'
+#  "
+# done
 exit ${exit_code:-127}

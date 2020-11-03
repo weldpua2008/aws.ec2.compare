@@ -5,6 +5,7 @@
 from pathlib import Path, PurePath
 from setuptools import setup, find_packages
 import sys
+import os
 import logging
 from typing import Dict, Iterable, List
 from glob import glob
@@ -26,11 +27,8 @@ try:
 except FileNotFoundError:
     long_description = ''
 
-
 INSTALL_REQUIREMENTS: Dict[str, Iterable[str]] = {
 }
-
-
 
 default_requirements = [
     line
@@ -85,10 +83,9 @@ def git_version(version_: str) -> str:
     if repo:
         sha = repo.head.commit.hexsha
         if repo.is_dirty():
-            return '.dev0+{sha}.dirty'.format(sha=sha)
+            return '.dirty:{version}+{sha}.dev0'.format(version=version_, sha=sha)
         return '.release:{version}+{sha}'.format(version=version_, sha=sha)
-    else:
-        return 'no_git_version'
+    return 'no_git_version:{version}'.format(version=version_)
 
 def write_version(filename: str = 'version.txt'):
     """
@@ -100,12 +97,21 @@ def write_version(filename: str = 'version.txt'):
     text = "{}".format(git_version(PACKAGE_VERSION))
     with open(filename, 'w') as file:
         file.write(text)
+    return text
 
 def do_setup():
     version_path = str(Path(my_dir/'version.txt').resolve())
-    write_version(filename=version_path)
+    _version = os.environ.get('PACKAGE_VERSION', write_version(filename=version_path))
+    if len(_version.split(":")) > 1:
+        _version=_version.split(":")[1]
+        if len(_version.split("+")) > 1:
+            _version= _version.split("+")[0]
+
+    version = "".join(e for e in _version if e.isalpha() or e.isnumeric() or e in ['.', '_','-'])
+
     setup(
         name=PACKAGE_NAME,
+        version=version,
         long_description=long_description,
         long_description_content_type="text/markdown",
         author='Valeriys Soloviov',

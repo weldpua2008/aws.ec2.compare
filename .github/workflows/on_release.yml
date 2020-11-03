@@ -72,7 +72,7 @@ jobs:
 
           export PACKAGE_VERSION=${VERSION}
           if [[ ${#TWINE_PASSWORD} -gt 0 ]];then
-            echo "Publishing ${#TWINE_USERNAME}"
+            echo "Publishing with TWINE_USERNAME & TWINE_PASSWORD"
           fi
           rm -rf build *.egg-info dist/*
           python setup.py build sdist bdist_wheel

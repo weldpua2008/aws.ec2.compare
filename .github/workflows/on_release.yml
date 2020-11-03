@@ -76,7 +76,7 @@ jobs:
           fi
           rm -rf build *.egg-info dist/*
           python setup.py build sdist bdist_wheel
-          twine upload --disable-progress-bar --non-interactive --skip-existing dist/*
+          twine upload --verbose --disable-progress-bar --non-interactive --skip-existing dist/*
           rm -rf build *.egg-info dist/* dist
   Github-release:
     if: |

@@ -1,5 +1,7 @@
+# This workflows will:
+#   - create a release from a tag
+#   - upload a Python Package using Twine when a release is created
 name: Bump version
-
 on:
   # release:
   #   types: [published]
@@ -8,7 +10,25 @@ on:
       - 'v*' # Push events to matching v*, i.e. v1.0
 
 jobs:
-  deploy:
+  Github-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: true
+          body_path: ./CHANGELOG.md
+
+  Publish-to-PyPi:
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1

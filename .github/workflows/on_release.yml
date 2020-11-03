@@ -97,5 +97,5 @@ jobs:
           echo "Publishing"
           rm -rf build *.egg-info dist/*
           python setup.py build sdist bdist_wheel
-          twine upload  --non-interactive dist/*
+          twine upload --verbose --non-interactive dist/*
           rm -rf build *.egg-info dist/* dist

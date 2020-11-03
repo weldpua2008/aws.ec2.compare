@@ -71,7 +71,9 @@ jobs:
           echo "##[set-output name=version;]$(echo ${VERSION})"
 
           export PACKAGE_VERSION=${VERSION}
-          echo "Publishing as ${TWINE_USERNAME}"
+          if [[ ${#TWINE_PASSWORD} -gt 0 ]];then
+            echo "Publishing ${#TWINE_USERNAME}"
+          fi
           rm -rf build *.egg-info dist/*
           python setup.py build sdist bdist_wheel
           twine upload --disable-progress-bar --non-interactive --skip-existing dist/*

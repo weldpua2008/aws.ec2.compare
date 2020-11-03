@@ -10,6 +10,7 @@ on:
       - CONTRIBUTING.md
       - .github/workflows/on_release.yml
       - .github/ISSUE_TEMPLATE/*
+      - .pypirc
   pull_request:
     branches: [ main ]
 jobs:

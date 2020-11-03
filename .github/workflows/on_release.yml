@@ -11,7 +11,7 @@ on:
 
 jobs:
   Publish:
-    name: Publish to PyPi
+    name: A new release to PyPi
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 1

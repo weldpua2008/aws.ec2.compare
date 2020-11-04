@@ -3,7 +3,7 @@ echo "##########################################"
 echo "###############   TESTS ##################"
 echo "##########################################"
 export LC_ALL="en_US.UTF-8" 2> /dev/null
-# export PYTHONPATH=$PYTHONPATH:..:../ec2_compare:../ec2_compare
+export PYTHONPATH=$PYTHONPATH:..:../ec2_compare:../ec2_compare
 
 START_TIME=$(date +%s)
 function on_exit(){

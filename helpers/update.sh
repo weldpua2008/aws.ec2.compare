@@ -1,15 +1,19 @@
 #!/usr/bin/env bash
+#
 # Update ec2data
-cd $(dirname "$0")
-# aws ec2 describe-instance-types | jq '.InstanceTypes' > aws_ec2.json
+#
+: "${CLEANUP_CACHE:=yes}"
 START_TIME=$(date +%s)
+
+cd $(dirname "$0")
+
 function on_exit(){
     local _exit_code=${1:-1}
     local runtime=$(($(date +%s) - START_TIME))
     echo "++++++++++++++++++++++++++++++++++++++++++++++
 Took ${runtime} seconds to execute
 ++++++++++++++++++++++++++++++++++++++++++++++"
-    if [[ -e ./aws_ec2.json ]];then
+    if [[ "${CLEANUP_CACHE}" = "yes" ]] && [[ -e ./aws_ec2.json ]];then
         echo "Removing cached json"
         rm -f ./aws_ec2.json
     fi

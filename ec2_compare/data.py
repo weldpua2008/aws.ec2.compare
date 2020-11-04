@@ -7,7 +7,7 @@ from pathlib import Path
 import ec2_compare.utils as utils
 
 
-@functools.lru_cache
+@functools.lru_cache()
 def get(key: str, value: str) -> list:
     """
     Returns list of the instances by search key and it's value.

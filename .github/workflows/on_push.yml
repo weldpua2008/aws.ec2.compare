@@ -36,10 +36,11 @@ jobs:
             ${{ matrix.python-version }}-package-
       - name: Install dependencies
         run: |
+          echo y|pip uninstall ec2-compare
           python -m pip install --upgrade pip
           pip install setuptools wheel twine gitpython
           python -m pip install -r requirements-dev.txt
-          pip install -e ./[devel]
+          pip install -U -e ./[devel]
       - name: Test
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

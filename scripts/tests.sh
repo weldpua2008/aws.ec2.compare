@@ -20,6 +20,8 @@ Exit code: ${_exit_code}
 
 }
 trap 'on_exit $?' EXIT HUP TERM INT
+find . -name '__pycache__' -type d -exec rm -rf {} \; 2> /dev/null || true
+
 set -e
 
 ###### Main

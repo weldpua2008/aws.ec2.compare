@@ -23,8 +23,8 @@ Took ${runtime} seconds to execute
 
 trap 'on_exit $?' EXIT HUP TERM INT
 
-echo "Downloading instance types via cli"
-aws ec2 describe-instance-types  | python3 -c "import sys, json; d=json.load(sys.stdin)['InstanceTypes']; json.dump(d, sys.stdout) if d else sys.exit(127)" > ./aws_ec2.json \
+echo "Downloading instance types via cli at ${PWD}"
+aws ec2 describe-instance-types  | python3 -c "import sys, json, operator; d=json.load(sys.stdin)['InstanceTypes']; d.sort(key=operator.itemgetter('InstanceType')); json.dump(d, sys.stdout, indent=4) if d else sys.exit(127)" > ./aws_ec2.json \
 && echo "Recreate ec2data.py" \
 && python3 redownload.py \
 && echo "Succeess"

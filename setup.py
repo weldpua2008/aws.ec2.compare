@@ -8,7 +8,6 @@ import sys
 import os
 import logging
 from typing import Dict, Iterable, List
-from glob import glob
 
 PY3 = sys.version_info[0] == 3
 
@@ -27,8 +26,7 @@ try:
 except FileNotFoundError:
     long_description = ''
 
-INSTALL_REQUIREMENTS: Dict[str, Iterable[str]] = {
-}
+INSTALL_REQUIREMENTS: List[str] = []
 
 default_requirements = [
     line
@@ -53,8 +51,6 @@ else:
 if sys.version_info < (3, 2):
     INSTALL_REQUIREMENTS.append('futures')
 
-if not INSTALL_REQUIREMENTS:
-    INSTALL_REQUIREMENTS = []
 EXTRAS_REQUIREMENTS: Dict[str, Iterable[str]] = {
     'devel': devel_requirements,
     'git': git_requirements,
@@ -122,11 +118,6 @@ def do_setup():
             'setuptools',
             'wheel',
         ],
-        # include_package_data=True,
-        # data_files = [
-        #     (PACKAGE_NAME, ['version.txt']),
-        #  ],
-
         packages=find_packages(),
         install_requires=INSTALL_REQUIREMENTS,
         extras_require=EXTRAS_REQUIREMENTS,

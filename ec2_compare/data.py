@@ -27,16 +27,14 @@ def get(key: str, value: str) -> list:
     except ModuleNotFoundError:
 
         val = list({
-                x.stem
-                for x in list(
-                    Path(Path(__file__).parent / f"internal/{_module_name}").glob(
-                        "*.py"
-                    )
+            x.stem
+            for x in list(
+                Path(Path(__file__).parent / f"internal/{_module_name}").glob(
+                    "*.py"
                 )
-                if x.is_file() and not x.stem.startswith("_")
+            )
+            if x.is_file() and not x.stem.startswith("_")
         })
         if val:
             raise ValueError(f"The '{key}' has no '{value} in {val}") from None
         raise ValueError(f"Please check if {key} is legit") from None
-
-    return []

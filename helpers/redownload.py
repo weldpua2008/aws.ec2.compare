@@ -105,6 +105,14 @@ with open(_parent / "aws_ec2.json") as json_file:
                 _sub_tests.mkdir(parents=True, exist_ok=True)
                 _usage_class = str(_filtered_value).lower().replace("-", "_")
                 fn = "{}.py".format(_usage_class)
+                _partial.sort(key=operator.itemgetter('InstanceType'))
+
+                # _partial.sort(key=operator.itemgetter('VCpuInfo')['DefaultVCpus'])
+                _partial.sort(
+                    key=lambda k:
+                    k['VCpuInfo']['DefaultVCpus']
+                    if 'VCpuInfo' in k and 'DefaultVCpus' in k['VCpuInfo']
+                    else k['InstanceType'])
                 with open(_sub_package / fn, 'w') as outfile:
                     if not _partial:
                         raise ValueError(

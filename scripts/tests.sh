@@ -28,15 +28,18 @@ set -e
 
 cd $(dirname "$0") \
     && cd ../tests \
+    && echo "Running pytest" \
     && pytest --cov=./ --cov-report=xml $@ \
-    && echo -e "\nStop the build if there are Python syntax errors or undefined names\n" >&2 \
+    && echo -e "\nCheck if there are Python syntax errors or undefined names\n" >&2 \
     && flake8 ../ec2_compare \
         --max-complexity=10 \
         --max-line-length=127 \
         --select=E9,F63,F7,F82 \
         --show-source \
         --statistics \
+    && echo "Running mypy" >&2 \
     && mypy ../ec2_compare \
+    && echo "Running pylint" >&2 \
     && pylint ../ec2_compare
 
 

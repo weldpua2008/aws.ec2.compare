@@ -50,7 +50,7 @@ with open(_parent / "aws_ec2.json") as json_file:
 
     _prop_name = 'CurrentGeneration'
     _prop_default = False
-    set([n for k in data for n in k.keys() if isinstance(k[n], bool)])
+    # set([n for k in data for n in k.keys() if isinstance(k[n], bool)])
 
     exclude_keys = ['InstanceType']
     for t in [bool, str, list]:

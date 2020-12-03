@@ -23,7 +23,6 @@ def dict_values(data: Dict, keys: List[Any],
     if isinstance(keys, set):
         keys = list(keys)
 
-
     for key in keys:
         if not isinstance(key, collections.abc.Hashable):
             continue

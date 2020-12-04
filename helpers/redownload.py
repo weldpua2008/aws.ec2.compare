@@ -80,7 +80,6 @@ with open(_parent / "aws_ec2.json") as json_file:
         def keys_structure(*arg, **kw) -> List:
             return [elem for k, v in keys_dict().items()
                     if k in arg or not arg for elem in v]
-
         """ .format(key_structure)))
 
         done(fn, _mem_start)

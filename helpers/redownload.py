@@ -34,6 +34,10 @@ _mem_start = getCurrentMemoryUsage()
 
 with open(_parent / "aws_ec2.json") as json_file:
     data = json.load(json_file)
+
+    # lambda elem: {key: val for v in elem.values() if isinstance(v, dict) for key, val in v.items()}
+    data = [{**{key: val for v in elem.values() if isinstance(v, dict)
+                for key, val in v.items()}, **elem} for elem in data]
     data.sort(key=operator.itemgetter('InstanceType'))
 
     _raw_package_root = Path(_package_root / "internal")
@@ -50,7 +54,36 @@ with open(_parent / "aws_ec2.json") as json_file:
 
     _prop_name = 'CurrentGeneration'
     _prop_default = False
-    # set([n for k in data for n in k.keys() if isinstance(k[n], bool)])
+
+    # TODO: use for filtering
+    key_structure = {
+        'str': list(set([n for k in data for n in k.keys() if isinstance(k[n], str)])),
+        'bool': list(set([n for k in data for n in k.keys() if isinstance(k[n], bool)])),
+        'list': list(set([n for k in data for n in k.keys() if isinstance(k[n], list)])),
+        'dict': list(set([n for k in data for n in k.keys() if isinstance(k[n], dict)])),
+        'int': list(set([n for k in data for n in k.keys() if isinstance(k[n], int)])),
+        'float': list(set([n for k in data for n in k.keys() if isinstance(k[n], float)])),
+        'other': list(set([n for k in data for n in k.keys() if not isinstance(
+            k[n], (dict, str, bool, list, float, int))]))
+    }
+    fn = "ec2keys.py"
+    with open(_raw_package_root / fn, 'w') as outfile:
+        outfile.write(textwrap.dedent("""
+        from typing import List
+
+
+        def keys_dict() -> dict:
+            # pylint: disable=all
+            return {}  # noqa: E501
+
+
+        def keys_structure(*arg, **kw) -> List:
+            return [elem for k, v in keys_dict().items()
+                    if k in arg or not arg for elem in v]
+
+        """ .format(key_structure)))
+
+        done(fn, _mem_start)
 
     exclude_keys = ['InstanceType']
     for t in [bool, str, list]:
@@ -60,7 +93,7 @@ with open(_parent / "aws_ec2.json") as json_file:
             #     continue
             val = []
             if t == list:
-                val = set([n for k in data for n in k[_filtered_key]])
+                val = set([n for k in data if _filtered_key in k for n in k[_filtered_key] if isinstance(n, str)])
             elif _filtered_key == 'InstanceType':
                 val = set([k.get(_filtered_key).split(".")[0]
                            for k in data if not k.get(_filtered_key, None) is None])
@@ -92,6 +125,8 @@ with open(_parent / "aws_ec2.json") as json_file:
                         _filtered_value) == str(x[_filtered_key]), data))
 
                 if not _partial:
+                    continue
+                if isinstance(_filtered_value, str) and ' ' in _filtered_value:
                     continue
                 _sub_package = Path(_raw_package_root / str(_display_filtered_key).lower())
                 _sub_package.mkdir(parents=True, exist_ok=True)

@@ -9,6 +9,19 @@ Compare EC2 instances families without querying AWS API
 
 ## Example:
 
+* Getting on instances by parameters
+```python
+import ec2_compare.mixin
+req = ec2_compare.mixin.EmrRequestMixin().ec3__get_machines(
+    max_instances=5, # maximum number of machines
+    # reuest parameters
+    **{
+        'cpu': 40, 'ram': 786432, 'min_cpu': 8, 'min_ram': 65536,
+        'InstanceType': ['c4', 'c5.', 'r4', 'r5.', 'm4', 'm5.'],
+        'SupportedArchitectures': ['x86_64'], 'SupportedUsageClasses': 'spot'
+    })
+```
+
 * Getting on instances suitable for on-demand
 
 ```python

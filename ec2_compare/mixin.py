@@ -212,6 +212,12 @@ class EmrRequestMixin(AwsInstanceMixin):
     A class for building the request.
     """
 
+    def ec3__handle_empty_dict(self):
+        """
+        The handling empty request must be implemented by the child class.
+        """
+        raise NotImplementedError('Please implement handle_empty_dict method')
+
     def ec3__get_machines_for_fleet_request(self, max_instances=5, **kwargs) -> List:
         """
         Returns a list for fleet reuest.

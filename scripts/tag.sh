@@ -32,6 +32,11 @@ if [[ ! "$semver" ]]; then
     echo "'$version' is not a valid semantic version"
     exit 2
 fi
+git show-ref --tags -d|grep -q "refs/tags/v${version}"'$'
+if [[ $? -eq 0 ]];then
+    echo "Tag v${version} is already exist"
+    exit 1
+fi
 
 git tag -d v${version}
 git push origin :refs/tags/v${version}

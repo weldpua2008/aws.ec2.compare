@@ -5,6 +5,8 @@ from typing import Union, Dict, List
 import re
 import ec2_compare.data
 from ec2_compare.internal.ec2keys import keys_structure as ec2keys
+
+
 # from ec2_compare.utils import dict_values
 
 
@@ -104,7 +106,7 @@ class AwsInstanceMixin(ComparableMixin):
         """
         raise NotImplementedError('Please implement handle_empty_dict method')
 
-    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments,too-many-locals
     def ec3__get_instances(self, cpu: int = 0, ram: int = 0,
                            num: int = 1,
                            max_cpu: int = 0, min_cpu: int = 0,
@@ -122,22 +124,43 @@ class AwsInstanceMixin(ComparableMixin):
             mixed (bool): False - If Instances will be mixed
                          True - only same family
         """
-        max_cpu = max_cpu if max_cpu > 0 else int(cpu / (num + 0.1) + 0.4)
-        max_ram = max_ram if max_ram > 0 else int(ram / (num + 0.1) + 0.4)
-        res = sorted([
-            x['InstanceType'] for x in self.ec3__from_dict(**kwargs)
+        data = self.ec3__from_dict(**kwargs)
+        if num == 0 or not isinstance(num, (int, float)):
+            num = 1
+        if not data:
+            return []
+        bench_cpu = max_cpu if max_cpu else max(min_cpu, 1)
+        bench_ram = max_ram if max_ram else max(min_ram, 1)
+        filter_max_cpu = max_cpu if max_cpu >= min_cpu else cpu
+        filter_max_ram = max_ram if max_ram >= min_ram else ram
+
+        res_bench = sorted([
+            {
+                **x,
+                'machine_times': min(
+                    float(x['DefaultVCpus'] / bench_cpu),
+                    float(x['SizeInMiB'] / bench_ram)
+                )
+            } for x in data
             if (
-                cpu == 0 or (
-                    'DefaultVCpus' in x
-                    and x['DefaultVCpus'] <= max_cpu
-                    and min_cpu <= x['DefaultVCpus']))
-            and (
-                ram == 0 or (
-                    'SizeInMiB' in x
-                    and x['SizeInMiB'] <= max_ram
-                    and min_ram <= x['SizeInMiB']))
-        ])  # , key=lambda x: x.get('DefaultVCpus', 1))
-        return res
+                       (cpu == 0 and max_cpu == 0) or (
+                       'DefaultVCpus' in x and min_cpu <= x['DefaultVCpus'] <= filter_max_cpu
+               ))
+               and (
+                       (ram == 0 and max_ram == 0) or (
+                       'SizeInMiB' in x and min_ram <= x['SizeInMiB'] <= filter_max_ram
+               ))
+        ], key=lambda x: x['machine_times'], reverse=True)
+
+        if len(res_bench) < 1:
+            return []
+
+        res_filtered = [
+            x['InstanceType'] for x in res_bench if x['machine_times'] >= 1
+        ]
+        if len(res_filtered) > 0:
+            return res_filtered
+        return [max(res_bench, key=lambda x: x['machine_times'])['InstanceType']]
 
     def ec3__from_dict(self, **kwargs):
         """Returns AWS Instances from the request.
@@ -148,7 +171,6 @@ class AwsInstanceMixin(ComparableMixin):
         Parameters:
             InstanceType (str, list): EC2 Instance type or family
                 default is all families
-
 
         """
         if not kwargs:
@@ -162,24 +184,22 @@ class AwsInstanceMixin(ComparableMixin):
 
         flat_keys = set(ec2keys('str', 'bool')).intersection(
             set(kwargs.keys())) - {'InstanceType'}
-        # complex_filter_keys = set(ec2keys()).intersection(
-        #     set(kwargs.keys()))
 
         # filtered list or set keys with values
         list_keys = [{k: kwargs.get(k)
-                      if isinstance(kwargs.get(k), (list, set))
-                      else [kwargs.get(k)]
+        if isinstance(kwargs.get(k), (list, set))
+        else [kwargs.get(k)]
                       }
                      for k in set(ec2keys('set', 'list')).intersection(
-            set(kwargs.keys()))
-        ]
+                set(kwargs.keys()))
+                     ]
 
         numeric_keys = [{k: (kwargs.get(k) + kwargs.get(k))[:2]
-                         if isinstance(kwargs.get(k), list)
-                         else [kwargs.get(k), kwargs.get(k)]
+        if isinstance(kwargs.get(k), list)
+        else [kwargs.get(k), kwargs.get(k)]
                          }
                         for k in set(ec2keys('int', 'float')).intersection(
-                            set(kwargs.keys()))
+                set(kwargs.keys()))
                         if isinstance(kwargs.get(k), (list, int, float))]
 
         return [x for x in _partial
@@ -191,16 +211,15 @@ class AwsInstanceMixin(ComparableMixin):
                 and x['InstanceType'].startswith(instance_type_tuple)
                 # filter by list keys
                 and all(
-                    all([
-                        any([val in x[k] for val in v])
-                        for k, v in sublist.items()
-                    ]) for sublist in list_keys if sublist.items()
-                )
+                all([
+                    any([val in x[k] for val in v])
+                    for k, v in sublist.items()
+                ]) for sublist in list_keys if sublist.items()
+            )
                 # filter by numeric keys with ability to specify range
                 and all((k in x
                          and isinstance(x[k], (int, float))
-                         and v[0] <= x[k]
-                         and x[k] <= v[1])
+                         and v[0] <= x[k] <= v[1])
                         for numeric_keys_elem in numeric_keys
                         for k, v in numeric_keys_elem.items() if v)
 
@@ -229,7 +248,6 @@ class EmrRequestMixin(AwsInstanceMixin):
         Returns a list of machines.
         """
         return self.ec3__get_instances(**kwargs)[:max_instances]
-
 
 # class OperableMixin(object):
 #     def __add__(self, other):
